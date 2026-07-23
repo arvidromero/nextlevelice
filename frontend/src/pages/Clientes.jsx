@@ -1,0 +1,135 @@
+import { useEffect, useState } from 'react';
+import api from '../api/client';
+import Topbar from '../components/Topbar';
+
+const vacio = { idCliente: '', nombre: '', telefono: '', direccion: '', email: '' };
+
+export default function Clientes() {
+  const [clientes, setClientes] = useState([]);
+  const [cargando, setCargando] = useState(true);
+  const [error, setError] = useState('');
+  const [modalAbierto, setModalAbierto] = useState(false);
+  const [form, setForm] = useState(vacio);
+  const [guardando, setGuardando] = useState(false);
+
+  async function cargar() {
+    setCargando(true);
+    try {
+      const { data } = await api.get('/clientes');
+      setClientes(data);
+    } catch (err) {
+      setError('No se pudieron cargar los clientes');
+    } finally {
+      setCargando(false);
+    }
+  }
+
+  useEffect(() => { cargar(); }, []);
+
+  async function guardar(e) {
+    e.preventDefault();
+    setGuardando(true);
+    try {
+      await api.post('/clientes', form);
+      setModalAbierto(false);
+      cargar();
+    } catch (err) {
+      alert(err.response?.data?.error || 'No se pudo guardar el cliente');
+    } finally {
+      setGuardando(false);
+    }
+  }
+
+  async function desactivar(idCliente) {
+    if (!confirm(`¿Desactivar al cliente ${idCliente}?`)) return;
+    await api.delete(`/clientes/${idCliente}`);
+    cargar();
+  }
+
+  return (
+    <div>
+      <Topbar />
+      <div className="page">
+        <div className="page-header">
+          <div>
+            <h1>Clientes</h1>
+            <p>Cuentas activas que reciben entregas de hielo</p>
+          </div>
+        </div>
+
+        <div className="toolbar">
+          <button className="btn btn-primary" onClick={() => { setForm(vacio); setModalAbierto(true); }}>+ Nuevo cliente</button>
+        </div>
+
+        <div className="card">
+          {error && <div className="error-banner">{error}</div>}
+
+          {cargando ? (
+            <p style={{ color: 'var(--text-secondary)' }}>Cargando...</p>
+          ) : clientes.length === 0 ? (
+            <div className="empty-state">Aun no hay clientes registrados.</div>
+          ) : (
+            <table>
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Nombre</th>
+                  <th>Telefono</th>
+                  <th>Factura</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                {clientes.map((c) => (
+                  <tr key={c.idCliente}>
+                    <td>{c.idCliente}</td>
+                    <td style={{ fontFamily: 'var(--font-body)' }}>{c.nombre}</td>
+                    <td>{c.telefono || '—'}</td>
+                    <td>{c.factura ? 'Si' : 'No'}</td>
+                    <td>
+                      <button className="btn btn-danger" onClick={() => desactivar(c.idCliente)}>Desactivar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </div>
+      </div>
+
+      {modalAbierto && (
+        <div className="modal-overlay" onClick={() => setModalAbierto(false)}>
+          <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
+            <h2 style={{ marginBottom: 18 }}>Nuevo cliente</h2>
+            <form onSubmit={guardar}>
+              <div className="field">
+                <label>ID (ej. C00002)</label>
+                <input required value={form.idCliente} onChange={(e) => setForm({ ...form, idCliente: e.target.value })} />
+              </div>
+              <div className="field">
+                <label>Nombre</label>
+                <input required value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} />
+              </div>
+              <div className="field">
+                <label>Telefono</label>
+                <input value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} />
+              </div>
+              <div className="field">
+                <label>Direccion</label>
+                <input value={form.direccion} onChange={(e) => setForm({ ...form, direccion: e.target.value })} />
+              </div>
+              <div className="field">
+                <label>Email</label>
+                <input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              </div>
+              <div className="modal-actions">
+                <button type="button" className="btn btn-ghost" onClick={() => setModalAbierto(false)}>Cancelar</button>
+                <button className="btn btn-primary" disabled={guardando}>{guardando ? 'Guardando...' : 'Guardar'}</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

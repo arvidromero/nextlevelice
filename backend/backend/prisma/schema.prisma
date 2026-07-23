@@ -1,0 +1,193 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlserver"
+  url      = env("DATABASE_URL")
+}
+
+model Usuario {
+  email         String   @id @map("Email") @db.VarChar(100)
+  nombre        String   @map("Nombre")
+  rol           String   @map("Rol") @db.VarChar(10)
+  activo        Boolean  @default(true) @map("Activo")
+  passwordHash  String?  @map("PasswordHash") @db.VarChar(255)
+  pin           String?  @map("PIN") @db.Char(4)
+  fechaCreacion DateTime @default(now()) @map("FechaCreacion")
+
+  @@map("Usuarios")
+}
+
+model Vehiculo {
+  idVehiculo     String   @id @map("idVehiculo") @db.VarChar(10)
+  placa          String?  @map("Placa") @db.VarChar(20)
+  descripcion    String   @map("Descripcion")
+  odometroActual Int      @default(0) @map("OdometroActual")
+  activo         Boolean  @default(true) @map("Activo")
+
+  @@map("Vehiculos")
+}
+
+model Ubicacion {
+  idUbicacion String  @id @map("idUbicacion") @db.VarChar(10)
+  nombre      String  @map("Nombre")
+  tipo        String  @map("Tipo") @db.VarChar(10)
+  idVehiculo  String? @map("idVehiculo") @db.VarChar(10)
+  activa      Boolean @default(true) @map("Activa")
+
+  @@map("Ubicaciones")
+}
+
+model Producto {
+  idProducto    String   @id @map("idProducto") @db.VarChar(10)
+  descripcion   String   @map("Descripcion")
+  precioVenta   Decimal  @map("PrecioVenta") @db.Decimal(10, 2)
+  imagenURL     String?  @map("ImagenURL")
+  activo        Boolean  @default(true) @map("Activo")
+  fechaCreacion DateTime @default(now()) @map("FechaCreacion")
+
+  @@map("Productos")
+}
+
+model Cliente {
+  idCliente     String   @id @map("idCliente") @db.VarChar(10)
+  nombre        String   @map("Nombre")
+  telefono      String?  @map("Telefono") @db.VarChar(20)
+  direccion     String?  @map("Direccion")
+  rfc           String?  @map("RFC") @db.VarChar(13)
+  factura       Boolean  @default(false) @map("Factura")
+  credito       Boolean  @default(false) @map("Credito")
+  limiteCredito Decimal? @map("LimiteCredito") @db.Decimal(10, 2)
+  diasCredito   Int?     @map("DiasCredito")
+  latitud       Decimal? @map("Latitud") @db.Decimal(10, 6)
+  longitud      Decimal? @map("Longitud") @db.Decimal(10, 6)
+  email         String?  @map("Email") @db.VarChar(100)
+  saldoCredito  Decimal  @default(0) @map("SaldoCredito") @db.Decimal(10, 2)
+  activo        Boolean  @default(true) @map("Activo")
+
+  @@map("Clientes")
+}
+
+model Contacto {
+  idContacto Int     @id @default(autoincrement()) @map("idContacto")
+  idCliente  String  @map("idCliente") @db.VarChar(10)
+  nombre     String  @map("Nombre")
+  puesto     String? @map("Puesto")
+  telefono   String? @map("Telefono") @db.VarChar(20)
+  email      String? @map("Email") @db.VarChar(100)
+  activo     Boolean @default(true) @map("Activo")
+
+  @@map("Contactos")
+}
+
+model Refrigerador {
+  idRefrigerador Int     @id @default(autoincrement()) @map("idRefrigerador")
+  idCliente      String  @map("idCliente") @db.VarChar(10)
+  marca          String? @map("Marca")
+  modelo         String? @map("Modelo")
+  serie          String? @unique @map("Serie") @db.VarChar(50)
+  capacidad      String? @map("Capacidad")
+  formato        String? @map("Formato")
+  imagenURL      String? @map("ImagenURL")
+  activo         Boolean @default(true) @map("Activo")
+
+  @@map("Refrigeradores")
+}
+
+model Concepto {
+  idConcepto String  @id @map("idConcepto") @db.VarChar(5)
+  factor     Int     @map("Factor")
+  concepto   String  @map("Concepto")
+  mostrar    Boolean @default(true) @map("Mostrar")
+
+  @@map("Conceptos")
+}
+
+model UbicacionExistencia {
+  idUbicacion        String   @map("idUbicacion") @db.VarChar(10)
+  idProducto         String   @map("idProducto") @db.VarChar(10)
+  saldo              Int      @default(0) @map("Saldo")
+  fechaActualizacion DateTime @default(now()) @map("FechaActualizacion")
+
+  @@id([idUbicacion, idProducto])
+  @@map("Ubicaciones_Existencias")
+}
+
+model Kardex {
+  kardexID         String   @id @map("KardexID") @db.VarChar(36)
+  idUbicacion      String   @map("idUbicacion") @db.VarChar(10)
+  idProducto       String   @map("idProducto") @db.VarChar(10)
+  fechaHora        DateTime @default(now()) @map("FechaHora")
+  cantidad         Int      @map("Cantidad")
+  idConcepto       String   @map("idConcepto") @db.VarChar(5)
+  idMaquina        String?  @map("idMaquina")
+  operacion        String   @map("Operacion") @db.VarChar(10)
+  ubicacionDestino String?  @map("Ubicacion_Destino") @db.VarChar(10)
+  referencia       String?  @map("Referencia")
+  usuario          String   @map("Usuario") @db.VarChar(100)
+  notas            String?  @map("Notas")
+
+  @@map("Kardex")
+}
+
+model Promocion {
+  idPromocion        Int      @id @default(autoincrement()) @map("idPromocion")
+  idCliente          String   @map("idCliente") @db.VarChar(10)
+  idProducto         String   @map("idProducto") @db.VarChar(10)
+  cantidadCompra     Int      @map("CantidadCompra")
+  cantidadBonificada Int      @map("CantidadBonificada")
+  fechaInicio        DateTime @default(now()) @map("FechaInicio") @db.Date
+  fechaVencimiento   DateTime @map("FechaVencimiento") @db.Date
+  activa             Boolean  @default(true) @map("Activa")
+
+  @@map("Promociones")
+}
+
+model Venta {
+  idVenta            String    @id @map("idVenta") @db.VarChar(20)
+  idCliente          String    @map("idCliente") @db.VarChar(10)
+  fechaHora          DateTime  @default(now()) @map("FechaHora")
+  estado             String    @default("Confirmada") @map("Estado") @db.VarChar(15)
+  motivoCancelacion  String?   @map("Motivo_Cancelacion")
+  usuarioCancelacion String?   @map("UsuarioCancelacion")
+  fechaCancelacion   DateTime? @map("FechaCancelacion")
+  idVehiculo         String    @map("idVehiculo") @db.VarChar(10)
+  latitud            Decimal?  @map("Latitud") @db.Decimal(10, 6)
+  longitud           Decimal?  @map("Longitud") @db.Decimal(10, 6)
+  total              Decimal   @default(0) @map("Total") @db.Decimal(10, 2)
+  importePagado      Decimal   @default(0) @map("ImportePagado") @db.Decimal(10, 2)
+  usuario            String    @map("Usuario") @db.VarChar(100)
+
+  @@map("Ventas")
+}
+
+model DetalleVenta {
+  idMovimiento       String  @id @map("idMovimiento") @db.VarChar(36)
+  idVenta            String  @map("idVenta") @db.VarChar(20)
+  idProducto         String  @map("idProducto") @db.VarChar(10)
+  cantidad           Int     @map("Cantidad")
+  precioUnitario     Decimal @map("PrecioUnitario") @db.Decimal(10, 2)
+  idPromocion        Int?    @map("idPromocion")
+  cantidadBonificada Int     @default(0) @map("CantidadBonificada")
+  subtotal           Decimal @map("Subtotal") @db.Decimal(10, 2)
+
+  @@map("DetalleVenta")
+}
+
+model Pago {
+  idPago     String   @id @map("idPago") @db.VarChar(36)
+  idVenta    String   @map("idVenta") @db.VarChar(20)
+  fechaHora  DateTime @default(now()) @map("FechaHora")
+  importe    Decimal  @map("Importe") @db.Decimal(10, 2)
+  tipoPago   String   @default("Efectivo") @map("TipoPago") @db.VarChar(20)
+  evidencia  String?  @map("Evidencia")
+  verificado Boolean  @default(false) @map("Verificado")
+  usuario    String   @map("Usuario") @db.VarChar(100)
+
+  @@map("Pagos")
+}
+
+// Nota: el resto de las tablas (Bitacoras, Abastecimientos,
+// MovimientosExtra, Ubicacion_Actual) se agregan con el mismo patron
+// conforme vayamos construyendo cada modulo.
