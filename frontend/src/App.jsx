@@ -10,6 +10,7 @@ import Ventas from './pages/Ventas';
 import Inventario from './pages/Inventario';
 import ClienteDetalle from './pages/ClienteDetalle';
 import Movimientos from './pages/Movimientos';
+import Bitacoras from './pages/Bitacoras';
 
 export default function App() {
   return (
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/inventario" element={<ProtectedRoute><Inventario /></ProtectedRoute>} />
           <Route path="/clientes/:id" element={<ProtectedRoute><ClienteDetalle /></ProtectedRoute>} />
           <Route path="/movimientos" element={<ProtectedRoute><Movimientos /></ProtectedRoute>} />
+          <Route path="/bitacoras" element={<ProtectedRoute><Bitacoras /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

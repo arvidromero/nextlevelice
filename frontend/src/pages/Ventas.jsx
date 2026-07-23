@@ -118,6 +118,20 @@ export default function Ventas() {
     }
   }
 
+  async function descargarTicket(idVenta) {
+    try {
+      const respuesta = await api.get(`/ventas/${idVenta}/ticket-pdf`, { responseType: 'blob' });
+      const url = window.URL.createObjectURL(new Blob([respuesta.data], { type: 'application/pdf' }));
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ticket-${idVenta}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      alert('No se pudo descargar el ticket');
+    }
+  }
+
   async function cancelarVenta(idVenta) {
     const motivo = prompt('Motivo de la cancelacion:');
     if (!motivo) return;
@@ -290,7 +304,8 @@ export default function Ventas() {
                           {v.estado}
                         </span>
                       </td>
-                      <td>
+                      <td style={{ display: 'flex', gap: 8 }}>
+                        <button className="btn btn-ghost" onClick={() => descargarTicket(v.idVenta)}>Ticket</button>
                         {v.estado === 'Confirmada' && usuario?.rol === 'Admin' && (
                           <button className="btn btn-danger" onClick={() => cancelarVenta(v.idVenta)}>Cancelar</button>
                         )}

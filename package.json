@@ -3,10 +3,12 @@
   "private": true,
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "frontend-chofer"
   ],
   "scripts": {
     "dev:backend": "npm run dev --workspace=backend",
-    "dev:frontend": "npm run dev --workspace=frontend"
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:chofer": "npm run dev --workspace=frontend-chofer"
   }
 }

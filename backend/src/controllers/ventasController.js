@@ -23,27 +23,30 @@ async function obtener(req, res) {
   res.json({ ...venta, detalle, pagos });
 }
 
-// Busca promocion activa y vigente para cliente+producto, y calcula el split
-async function calcularLineasConPromo(tx, idCliente, idProducto, cantidad, precioUnitario) {
+// Busca promocion activa y vigente para cliente+producto. El bonus se agrega
+// POR ENCIMA de lo que el cliente pide (pide 5, se lleva 6 -- el chofer solo
+// captura lo que el cliente pidio, el regalo es automatico).
+async function calcularLineasConPromo(tx, idCliente, idProducto, cantidadSolicitada, precioUnitario) {
   const hoy = new Date();
   const promo = await tx.promocion.findFirst({
     where: { idCliente, idProducto, activa: true, fechaVencimiento: { gte: hoy } },
   });
 
   if (!promo) {
-    return [{ idProducto, cantidad, precioUnitario, idPromocion: null, cantidadBonificada: 0, subtotal: cantidad * precioUnitario }];
+    return {
+      lineas: [{ idProducto, cantidad: cantidadSolicitada, precioUnitario, idPromocion: null, cantidadBonificada: 0, subtotal: cantidadSolicitada * precioUnitario }],
+      cantidadFisica: cantidadSolicitada,
+    };
   }
 
-  const grupo = promo.cantidadCompra + promo.cantidadBonificada;
-  const gruposCompletos = Math.floor(cantidad / grupo);
+  const gruposCompletos = Math.floor(cantidadSolicitada / promo.cantidadCompra);
   const cantidadBonificada = gruposCompletos * promo.cantidadBonificada;
-  const cantidadCobrada = cantidad - cantidadBonificada;
 
-  const lineas = [{ idProducto, cantidad: cantidadCobrada, precioUnitario, idPromocion: null, cantidadBonificada: 0, subtotal: cantidadCobrada * precioUnitario }];
+  const lineas = [{ idProducto, cantidad: cantidadSolicitada, precioUnitario, idPromocion: null, cantidadBonificada: 0, subtotal: cantidadSolicitada * precioUnitario }];
   if (cantidadBonificada > 0) {
     lineas.push({ idProducto, cantidad: cantidadBonificada, precioUnitario, idPromocion: promo.idPromocion, cantidadBonificada, subtotal: 0 });
   }
-  return lineas;
+  return { lineas, cantidadFisica: cantidadSolicitada + cantidadBonificada };
 }
 
 // POST /api/ventas
@@ -82,7 +85,7 @@ async function crear(req, res) {
         const precio = precioPorProducto[item.idProducto];
         if (precio == null) throw new Error(`Producto ${item.idProducto} no encontrado`);
 
-        const lineas = await calcularLineasConPromo(tx, idCliente, item.idProducto, item.cantidad, precio);
+        const { lineas, cantidadFisica } = await calcularLineasConPromo(tx, idCliente, item.idProducto, item.cantidad, precio);
         for (const linea of lineas) {
           total += linea.subtotal;
           todasLasLineas.push(linea);
@@ -102,12 +105,12 @@ async function crear(req, res) {
         }
 
         // El Kardex se afecta por el TOTAL de piezas fisicas entregadas
-        // (cobradas + bonificadas), sin importar el precio.
+        // (lo pedido + el bonus de promocion), sin importar el precio.
         await tx.$queryRaw`
           EXEC sp_RegistrarMovimientoKardex
             @idUbicacion = ${idVehiculo},
             @idProducto = ${item.idProducto},
-            @Cantidad = ${item.cantidad},
+            @Cantidad = ${cantidadFisica},
             @idConcepto = 'VTA',
             @Usuario = ${req.usuario.email},
             @Referencia = ${idVenta}

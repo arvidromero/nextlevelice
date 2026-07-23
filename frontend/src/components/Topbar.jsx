@@ -16,6 +16,7 @@ export default function Topbar() {
           <NavLink to="/ventas">Ventas</NavLink>
           <NavLink to="/inventario">Inventario</NavLink>
           <NavLink to="/movimientos">Movimientos</NavLink>
+          <NavLink to="/bitacoras">Bitácoras</NavLink>
         </nav>
       </div>
       <div className="topbar-user">
