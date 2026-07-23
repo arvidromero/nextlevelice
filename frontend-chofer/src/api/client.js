@@ -1,4 +1,4 @@
-import axios from 'axios';
+﻿import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || 'http://localhost:4000/api',
@@ -23,6 +23,13 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+export async function subirImagen(file) {
+  const formData = new FormData();
+  formData.append('imagen', file);
+  const { data } = await api.post('/uploads', formData);
+  return data.url;
+}
 
 export function urlImagen(rutaRelativa) {
   if (!rutaRelativa) return null;
