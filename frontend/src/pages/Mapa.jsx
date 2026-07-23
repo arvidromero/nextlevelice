@@ -8,7 +8,7 @@ export default function Mapa() {
   const [vehiculos, setVehiculos] = useState([]);
   const [datos, setDatos] = useState([]);
   const [error, setError] = useState('');
-  const [ultimaActualizacion, setUltimaActualizacion] = useState(null);
+  const [seleccionado, setSeleccionado] = useState(null);
 
   const mapaRef = useRef(null);
   const mapaInstancia = useRef(null);
@@ -28,16 +28,15 @@ export default function Mapa() {
 
   function colorPorFrescura(fecha) {
     const min = minutosDesde(fecha);
-    if (min <= 5) return '#1E7A4C'; // verde -- reciente
-    if (min <= 15) return '#A66A0E'; // amarillo -- tibio
-    return '#B3261E'; // rojo -- viejo, puede estar sin señal
+    if (min <= 5) return '#1E7A4C';
+    if (min <= 15) return '#A66A0E';
+    return '#B3261E';
   }
 
   async function cargarDatos() {
     try {
       const { data } = await api.get('/ubicacion-actual/resumen');
       setDatos(data);
-      setUltimaActualizacion(new Date());
     } catch (err) {
       setError('No se pudo cargar la ubicación de las camionetas');
     }
@@ -49,20 +48,16 @@ export default function Mapa() {
     return () => clearInterval(intervalo);
   }, []);
 
-  // Inicializar mapa una sola vez
   useEffect(() => {
     if (!window.L || !mapaRef.current || mapaInstancia.current) return;
     mapaInstancia.current = window.L.map(mapaRef.current).setView([22.1565, -100.9855], 12);
     window.L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapaInstancia.current);
   }, []);
 
-  // Actualizar marcadores cada vez que llegan datos nuevos
   useEffect(() => {
     if (!window.L || !mapaInstancia.current) return;
-
     const idsActuales = new Set(datos.map((d) => d.idVehiculo));
 
-    // Quitar marcadores de camionetas que ya no reportan
     Object.keys(marcadores.current).forEach((id) => {
       if (!idsActuales.has(id)) {
         mapaInstancia.current.removeLayer(marcadores.current[id]);
@@ -77,7 +72,6 @@ export default function Mapa() {
         html: `<div style="background:${color};width:16px;height:16px;border-radius:50%;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,0.4);"></div>`,
         iconSize: [16, 16],
       });
-
       const popupHtml = `
         <strong>${nombreVehiculo(d.idVehiculo)}</strong><br/>
         Chofer: ${d.idChofer ?? '—'}<br/>
@@ -96,37 +90,78 @@ export default function Mapa() {
     });
   }, [datos, vehiculos]);
 
+  function irACamioneta(d) {
+    setSeleccionado(d.idVehiculo);
+    if (mapaInstancia.current) {
+      mapaInstancia.current.setView([d.latitud, d.longitud], 15);
+      marcadores.current[d.idVehiculo]?.openPopup();
+    }
+  }
+
+  const activas = datos.length;
+  const sinReportar = Math.max(vehiculos.length - datos.length, 0);
+
   return (
-    <div>
+    <div className="app-shell-web">
       <Topbar />
-      <div className="page" style={{ maxWidth: 1200 }}>
-        <div className="page-header">
-          <div>
-            <h1>Mapa en vivo</h1>
-            <p>Posición actual de las camionetas en operación</p>
-          </div>
-          <div style={{ fontSize: 12, color: 'var(--text-muted)' }}>
-            {ultimaActualizacion && `Actualizado: ${ultimaActualizacion.toLocaleTimeString('es-MX')}`}
-          </div>
-        </div>
+      <div style={{ display: 'flex', height: 'calc(100vh - 61px)' }}>
+        {/* Panel lateral */}
+        <div style={{ width: 320, flexShrink: 0, borderRight: '1px solid var(--border)', overflowY: 'auto', padding: '20px 18px', background: 'var(--surface)' }}>
+          <h1 style={{ fontSize: 18, marginBottom: 2 }}>Mapa en vivo</h1>
+          <p style={{ fontSize: 12, color: 'var(--text-secondary)', marginBottom: 16 }}>Camionetas en operación hoy</p>
 
-        {error && <div className="error-banner">{error}</div>}
+          <div style={{ display: 'flex', gap: 10, marginBottom: 18 }}>
+            <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ fontSize: 20, fontWeight: 700 }}>{activas}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Activas</div>
+            </div>
+            <div style={{ flex: 1, border: '1px solid var(--border)', borderRadius: 10, padding: '10px 12px' }}>
+              <div style={{ fontSize: 20, fontWeight: 700 }}>{sinReportar}</div>
+              <div style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'uppercase' }}>Sin reportar</div>
+            </div>
+          </div>
 
-        {datos.length === 0 && (
-          <div className="card" style={{ marginBottom: 16 }}>
-            <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>
-              Ninguna camioneta ha mandado su ubicación todavia hoy (necesitan tener una bitácora "En operación").
+          {error && <div className="error-banner">{error}</div>}
+
+          {datos.length === 0 ? (
+            <p style={{ fontSize: 13, color: 'var(--text-muted)' }}>
+              Ninguna camioneta ha reportado posición todavía hoy.
             </p>
-          </div>
-        )}
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {datos.map((d) => (
+                <div
+                  key={d.idVehiculo}
+                  onClick={() => irACamioneta(d)}
+                  style={{
+                    cursor: 'pointer',
+                    border: `1px solid ${seleccionado === d.idVehiculo ? 'var(--accent, #E3007C)' : 'var(--border)'}`,
+                    borderRadius: 10,
+                    padding: '10px 12px',
+                    background: seleccionado === d.idVehiculo ? 'rgba(227,0,124,0.05)' : 'transparent',
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                    <span style={{ width: 9, height: 9, borderRadius: '50%', background: colorPorFrescura(d.fechaHora), flexShrink: 0 }} />
+                    <span style={{ fontWeight: 700, fontSize: 13 }}>{nombreVehiculo(d.idVehiculo)}</span>
+                  </div>
+                  <div style={{ fontSize: 11, color: 'var(--text-secondary)' }}>{d.idChofer}</div>
+                  <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 4 }}>
+                    {d.existenciaTotal} piezas · ${Number(d.ventasHoy).toFixed(0)} hoy · hace {minutosDesde(d.fechaHora)} min
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
 
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div ref={mapaRef} style={{ height: 520 }} />
+          <p style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 20 }}>
+            🟢 ≤5 min &nbsp; 🟡 6-15 min &nbsp; 🔴 &gt;15 min <br />
+            Se actualiza cada 30 segundos.
+          </p>
         </div>
 
-        <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 10 }}>
-          🟢 Actualizado hace 5 min o menos · 🟡 Hace 6-15 min · 🔴 Mas de 15 min (puede estar sin señal) · Se refresca solo cada 30 segundos.
-        </p>
+        {/* Mapa */}
+        <div ref={mapaRef} style={{ flex: 1 }} />
       </div>
     </div>
   );
