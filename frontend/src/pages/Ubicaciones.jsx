@@ -10,6 +10,7 @@ export default function Ubicaciones() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [editando, setEditando] = useState(null);
   const [form, setForm] = useState(vacio);
   const [guardando, setGuardando] = useState(false);
 
@@ -31,12 +32,33 @@ export default function Ubicaciones() {
 
   useEffect(() => { cargar(); }, []);
 
+  function abrirNuevo() {
+    setEditando(null);
+    setForm(vacio);
+    setModalAbierto(true);
+  }
+
+  function abrirEditar(ubicacion) {
+    setEditando(ubicacion);
+    setForm({
+      idUbicacion: ubicacion.idUbicacion,
+      nombre: ubicacion.nombre,
+      tipo: ubicacion.tipo,
+      idVehiculo: ubicacion.idVehiculo || '',
+    });
+    setModalAbierto(true);
+  }
+
   async function guardar(e) {
     e.preventDefault();
     setGuardando(true);
     try {
       const payload = { ...form, idVehiculo: form.tipo === 'Vehiculo' ? form.idVehiculo : null };
-      await api.post('/ubicaciones', payload);
+      if (editando) {
+        await api.put(`/ubicaciones/${editando.idUbicacion}`, payload);
+      } else {
+        await api.post('/ubicaciones', payload);
+      }
       setModalAbierto(false);
       cargar();
     } catch (err) {
@@ -64,7 +86,7 @@ export default function Ubicaciones() {
         </div>
 
         <div className="toolbar">
-          <button className="btn btn-primary" onClick={() => { setForm(vacio); setModalAbierto(true); }}>+ Nueva ubicacion</button>
+          <button className="btn btn-primary" onClick={abrirNuevo}>+ Nueva ubicacion</button>
         </div>
 
         <div className="card">
@@ -92,7 +114,8 @@ export default function Ubicaciones() {
                     <td style={{ fontFamily: 'var(--font-body)' }}>{u.nombre}</td>
                     <td>{u.tipo}</td>
                     <td>{u.idVehiculo || '—'}</td>
-                    <td>
+                    <td style={{ display: 'flex', gap: 8 }}>
+                      <button className="btn btn-ghost" onClick={() => abrirEditar(u)}>Editar</button>
                       <button className="btn btn-danger" onClick={() => desactivar(u.idUbicacion)}>Desactivar</button>
                     </td>
                   </tr>
@@ -106,11 +129,11 @@ export default function Ubicaciones() {
       {modalAbierto && (
         <div className="modal-overlay" onClick={() => setModalAbierto(false)}>
           <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginBottom: 18 }}>Nueva ubicacion</h2>
+            <h2 style={{ marginBottom: 18 }}>{editando ? 'Editar ubicacion' : 'Nueva ubicacion'}</h2>
             <form onSubmit={guardar}>
               <div className="field">
                 <label>ID (ej. CAM004)</label>
-                <input required value={form.idUbicacion} onChange={(e) => setForm({ ...form, idUbicacion: e.target.value })} />
+                <input required disabled={!!editando} value={form.idUbicacion} onChange={(e) => setForm({ ...form, idUbicacion: e.target.value })} />
               </div>
               <div className="field">
                 <label>Nombre</label>

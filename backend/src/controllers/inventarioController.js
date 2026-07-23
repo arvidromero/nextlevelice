@@ -1,4 +1,5 @@
 const prisma = require('../config/db');
+const { mensajeAmigable } = require('../utils/errores');
 
 // GET /api/inventario/conceptos
 async function listarConceptos(req, res) {
@@ -69,7 +70,7 @@ async function registrarMovimiento(req, res) {
     });
     res.status(201).json({ kardexID });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: mensajeAmigable(err) });
   }
 }
 
@@ -109,7 +110,7 @@ async function registrarTraspaso(req, res) {
 
     res.status(201).json({ kardexIDSalida, kardexIDEntrada });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: mensajeAmigable(err) });
   }
 }
 

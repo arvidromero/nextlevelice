@@ -63,30 +63,37 @@ h1, h2, h3 {
   align-items: center;
   justify-content: space-between;
   padding: 16px 28px;
-  background: var(--surface-frost);
-  backdrop-filter: blur(6px);
-  border-bottom: 1px solid var(--border);
+  background: #E3007C;
 }
 
 .topbar-user {
   font-size: 13px;
-  color: var(--text-secondary);
+  color: #FFFFFF;
   display: flex;
   align-items: center;
   gap: 12px;
+}
+.topbar-user .btn-ghost {
+  color: #FFFFFF;
+  border-color: rgba(255, 255, 255, 0.45);
+}
+.topbar-user .btn-ghost:hover {
+  border-color: #FFFFFF;
+  color: #FFFFFF;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .nav { display: flex; gap: 22px; }
 .nav a {
   font-size: 13px;
   font-weight: 500;
-  color: var(--text-secondary);
+  color: rgba(255, 255, 255, 0.75);
   text-decoration: none;
   padding-bottom: 2px;
   border-bottom: 2px solid transparent;
 }
-.nav a:hover { color: var(--text-primary); }
-.nav a.active { color: var(--text-primary); border-bottom-color: var(--text-primary); }
+.nav a:hover { color: #FFFFFF; }
+.nav a.active { color: #FFFFFF; border-bottom-color: #FFFFFF; }
 
 .btn {
   font-family: var(--font-body);

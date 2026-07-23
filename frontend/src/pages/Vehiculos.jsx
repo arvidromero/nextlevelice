@@ -9,6 +9,7 @@ export default function Vehiculos() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [editando, setEditando] = useState(null);
   const [form, setForm] = useState(vacio);
   const [guardando, setGuardando] = useState(false);
 
@@ -26,11 +27,27 @@ export default function Vehiculos() {
 
   useEffect(() => { cargar(); }, []);
 
+  function abrirNuevo() {
+    setEditando(null);
+    setForm(vacio);
+    setModalAbierto(true);
+  }
+
+  function abrirEditar(vehiculo) {
+    setEditando(vehiculo);
+    setForm({ idVehiculo: vehiculo.idVehiculo, placa: vehiculo.placa || '', descripcion: vehiculo.descripcion });
+    setModalAbierto(true);
+  }
+
   async function guardar(e) {
     e.preventDefault();
     setGuardando(true);
     try {
-      await api.post('/vehiculos', form);
+      if (editando) {
+        await api.put(`/vehiculos/${editando.idVehiculo}`, form);
+      } else {
+        await api.post('/vehiculos', form);
+      }
       setModalAbierto(false);
       cargar();
     } catch (err) {
@@ -58,7 +75,7 @@ export default function Vehiculos() {
         </div>
 
         <div className="toolbar">
-          <button className="btn btn-primary" onClick={() => { setForm(vacio); setModalAbierto(true); }}>+ Nuevo vehiculo</button>
+          <button className="btn btn-primary" onClick={abrirNuevo}>+ Nuevo vehiculo</button>
         </div>
 
         <div className="card">
@@ -86,7 +103,8 @@ export default function Vehiculos() {
                     <td>{v.placa || '—'}</td>
                     <td style={{ fontFamily: 'var(--font-body)' }}>{v.descripcion}</td>
                     <td>{v.odometroActual.toLocaleString()} km</td>
-                    <td>
+                    <td style={{ display: 'flex', gap: 8 }}>
+                      <button className="btn btn-ghost" onClick={() => abrirEditar(v)}>Editar</button>
                       <button className="btn btn-danger" onClick={() => desactivar(v.idVehiculo)}>Desactivar</button>
                     </td>
                   </tr>
@@ -100,11 +118,11 @@ export default function Vehiculos() {
       {modalAbierto && (
         <div className="modal-overlay" onClick={() => setModalAbierto(false)}>
           <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginBottom: 18 }}>Nuevo vehiculo</h2>
+            <h2 style={{ marginBottom: 18 }}>{editando ? 'Editar vehiculo' : 'Nuevo vehiculo'}</h2>
             <form onSubmit={guardar}>
               <div className="field">
                 <label>ID (ej. VH006)</label>
-                <input required value={form.idVehiculo} onChange={(e) => setForm({ ...form, idVehiculo: e.target.value })} />
+                <input required disabled={!!editando} value={form.idVehiculo} onChange={(e) => setForm({ ...form, idVehiculo: e.target.value })} />
               </div>
               <div className="field">
                 <label>Placa</label>

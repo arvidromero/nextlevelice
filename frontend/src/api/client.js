@@ -24,3 +24,19 @@ api.interceptors.response.use(
 );
 
 export default api;
+
+// Sube un archivo de imagen y regresa la ruta relativa (ej. /uploads/xxx.jpg)
+export async function subirImagen(file) {
+  const formData = new FormData();
+  formData.append('imagen', file);
+  const { data } = await api.post('/uploads', formData);
+  return data.url;
+}
+
+// Convierte una ruta relativa (/uploads/xxx.jpg) en una URL completa para mostrarla
+export function urlImagen(rutaRelativa) {
+  if (!rutaRelativa) return null;
+  if (rutaRelativa.startsWith('http')) return rutaRelativa;
+  const host = (import.meta.env.VITE_API_URL || 'http://localhost:4000/api').replace(/\/api\/?$/, '');
+  return `${host}${rutaRelativa.startsWith('/') ? '' : '/'}${rutaRelativa}`;
+}

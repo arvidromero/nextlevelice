@@ -1,16 +1,18 @@
 import { useEffect, useState } from 'react';
-import api from '../api/client';
+import api, { subirImagen, urlImagen } from '../api/client';
 import Topbar from '../components/Topbar';
 
-const vacio = { idProducto: '', descripcion: '', precioVenta: '' };
+const vacio = { idProducto: '', descripcion: '', precioVenta: '', imagenURL: '' };
 
 export default function Productos() {
   const [productos, setProductos] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [editando, setEditando] = useState(null);
   const [form, setForm] = useState(vacio);
   const [guardando, setGuardando] = useState(false);
+  const [subiendoImagen, setSubiendoImagen] = useState(false);
 
   async function cargar() {
     setCargando(true);
@@ -27,15 +29,41 @@ export default function Productos() {
   useEffect(() => { cargar(); }, []);
 
   function abrirNuevo() {
+    setEditando(null);
     setForm(vacio);
     setModalAbierto(true);
+  }
+
+  function abrirEditar(producto) {
+    setEditando(producto);
+    setForm({ idProducto: producto.idProducto, descripcion: producto.descripcion, precioVenta: producto.precioVenta, imagenURL: producto.imagenURL || '' });
+    setModalAbierto(true);
+  }
+
+  async function onSeleccionarImagen(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    setSubiendoImagen(true);
+    try {
+      const url = await subirImagen(file);
+      setForm((f) => ({ ...f, imagenURL: url }));
+    } catch (err) {
+      alert('No se pudo subir la imagen');
+    } finally {
+      setSubiendoImagen(false);
+    }
   }
 
   async function guardar(e) {
     e.preventDefault();
     setGuardando(true);
     try {
-      await api.post('/productos', { ...form, precioVenta: Number(form.precioVenta) });
+      const payload = { ...form, precioVenta: Number(form.precioVenta) };
+      if (editando) {
+        await api.put(`/productos/${editando.idProducto}`, payload);
+      } else {
+        await api.post('/productos', payload);
+      }
       setModalAbierto(false);
       cargar();
     } catch (err) {
@@ -77,6 +105,7 @@ export default function Productos() {
             <table>
               <thead>
                 <tr>
+                  <th></th>
                   <th>ID</th>
                   <th>Descripcion</th>
                   <th>Precio</th>
@@ -87,11 +116,19 @@ export default function Productos() {
               <tbody>
                 {productos.map((p) => (
                   <tr key={p.idProducto}>
+                    <td>
+                      {p.imagenURL ? (
+                        <img src={urlImagen(p.imagenURL)} alt={p.descripcion} style={{ width: 36, height: 36, objectFit: 'cover', borderRadius: 6, border: '1px solid var(--border)' }} />
+                      ) : (
+                        <div style={{ width: 36, height: 36, borderRadius: 6, background: '#F2F2F0' }} />
+                      )}
+                    </td>
                     <td>{p.idProducto}</td>
                     <td style={{ fontFamily: 'var(--font-body)' }}>{p.descripcion}</td>
                     <td>${Number(p.precioVenta).toFixed(2)}</td>
                     <td><span className="pill pill-ok">Activo</span></td>
-                    <td>
+                    <td style={{ display: 'flex', gap: 8 }}>
+                      <button className="btn btn-ghost" onClick={() => abrirEditar(p)}>Editar</button>
                       <button className="btn btn-danger" onClick={() => desactivar(p.idProducto)}>Desactivar</button>
                     </td>
                   </tr>
@@ -105,11 +142,11 @@ export default function Productos() {
       {modalAbierto && (
         <div className="modal-overlay" onClick={() => setModalAbierto(false)}>
           <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginBottom: 18 }}>Nuevo producto</h2>
+            <h2 style={{ marginBottom: 18 }}>{editando ? 'Editar producto' : 'Nuevo producto'}</h2>
             <form onSubmit={guardar}>
               <div className="field">
                 <label>ID (ej. NLC5K)</label>
-                <input required value={form.idProducto} onChange={(e) => setForm({ ...form, idProducto: e.target.value })} />
+                <input required disabled={!!editando} value={form.idProducto} onChange={(e) => setForm({ ...form, idProducto: e.target.value })} />
               </div>
               <div className="field">
                 <label>Descripcion</label>
@@ -119,9 +156,17 @@ export default function Productos() {
                 <label>Precio de venta</label>
                 <input required type="number" step="0.01" value={form.precioVenta} onChange={(e) => setForm({ ...form, precioVenta: e.target.value })} />
               </div>
+              <div className="field">
+                <label>Foto</label>
+                {form.imagenURL && (
+                  <img src={urlImagen(form.imagenURL)} alt="" style={{ width: 64, height: 64, objectFit: 'cover', borderRadius: 8, marginBottom: 8, display: 'block' }} />
+                )}
+                <input type="file" accept="image/*" onChange={onSeleccionarImagen} />
+                {subiendoImagen && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Subiendo...</p>}
+              </div>
               <div className="modal-actions">
                 <button type="button" className="btn btn-ghost" onClick={() => setModalAbierto(false)}>Cancelar</button>
-                <button className="btn btn-primary" disabled={guardando}>{guardando ? 'Guardando...' : 'Guardar'}</button>
+                <button className="btn btn-primary" disabled={guardando || subiendoImagen}>{guardando ? 'Guardando...' : 'Guardar'}</button>
               </div>
             </form>
           </div>

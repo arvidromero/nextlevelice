@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import api from '../api/client';
 import Topbar from '../components/Topbar';
 
@@ -9,6 +10,7 @@ export default function Clientes() {
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
   const [modalAbierto, setModalAbierto] = useState(false);
+  const [editando, setEditando] = useState(null);
   const [form, setForm] = useState(vacio);
   const [guardando, setGuardando] = useState(false);
 
@@ -26,11 +28,33 @@ export default function Clientes() {
 
   useEffect(() => { cargar(); }, []);
 
+  function abrirNuevo() {
+    setEditando(null);
+    setForm(vacio);
+    setModalAbierto(true);
+  }
+
+  function abrirEditar(cliente) {
+    setEditando(cliente);
+    setForm({
+      idCliente: cliente.idCliente,
+      nombre: cliente.nombre,
+      telefono: cliente.telefono || '',
+      direccion: cliente.direccion || '',
+      email: cliente.email || '',
+    });
+    setModalAbierto(true);
+  }
+
   async function guardar(e) {
     e.preventDefault();
     setGuardando(true);
     try {
-      await api.post('/clientes', form);
+      if (editando) {
+        await api.put(`/clientes/${editando.idCliente}`, form);
+      } else {
+        await api.post('/clientes', form);
+      }
       setModalAbierto(false);
       cargar();
     } catch (err) {
@@ -58,7 +82,7 @@ export default function Clientes() {
         </div>
 
         <div className="toolbar">
-          <button className="btn btn-primary" onClick={() => { setForm(vacio); setModalAbierto(true); }}>+ Nuevo cliente</button>
+          <button className="btn btn-primary" onClick={abrirNuevo}>+ Nuevo cliente</button>
         </div>
 
         <div className="card">
@@ -86,7 +110,9 @@ export default function Clientes() {
                     <td style={{ fontFamily: 'var(--font-body)' }}>{c.nombre}</td>
                     <td>{c.telefono || '—'}</td>
                     <td>{c.factura ? 'Si' : 'No'}</td>
-                    <td>
+                    <td style={{ display: 'flex', gap: 8 }}>
+                      <Link to={`/clientes/${c.idCliente}`} className="btn btn-ghost" style={{ textDecoration: 'none', display: 'inline-block' }}>Ver detalle</Link>
+                      <button className="btn btn-ghost" onClick={() => abrirEditar(c)}>Editar</button>
                       <button className="btn btn-danger" onClick={() => desactivar(c.idCliente)}>Desactivar</button>
                     </td>
                   </tr>
@@ -100,11 +126,11 @@ export default function Clientes() {
       {modalAbierto && (
         <div className="modal-overlay" onClick={() => setModalAbierto(false)}>
           <div className="card modal-card" onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ marginBottom: 18 }}>Nuevo cliente</h2>
+            <h2 style={{ marginBottom: 18 }}>{editando ? 'Editar cliente' : 'Nuevo cliente'}</h2>
             <form onSubmit={guardar}>
               <div className="field">
                 <label>ID (ej. C00002)</label>
-                <input required value={form.idCliente} onChange={(e) => setForm({ ...form, idCliente: e.target.value })} />
+                <input required disabled={!!editando} value={form.idCliente} onChange={(e) => setForm({ ...form, idCliente: e.target.value })} />
               </div>
               <div className="field">
                 <label>Nombre</label>

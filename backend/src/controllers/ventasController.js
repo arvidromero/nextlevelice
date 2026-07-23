@@ -1,5 +1,6 @@
 const crypto = require('crypto');
 const prisma = require('../config/db');
+const { mensajeAmigable } = require('../utils/errores');
 
 // GET /api/ventas?idVehiculo=VH001
 async function listar(req, res) {
@@ -133,7 +134,7 @@ async function crear(req, res) {
 
     res.status(201).json(resultado);
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: mensajeAmigable(err) });
   }
 }
 
@@ -182,7 +183,7 @@ async function cancelar(req, res) {
 
     res.json({ mensaje: 'Venta cancelada y Kardex revertido' });
   } catch (err) {
-    res.status(400).json({ error: err.message });
+    res.status(400).json({ error: mensajeAmigable(err) });
   }
 }
 

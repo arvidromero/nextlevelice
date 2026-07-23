@@ -140,6 +140,7 @@ model Promocion {
   fechaInicio        DateTime @default(now()) @map("FechaInicio") @db.Date
   fechaVencimiento   DateTime @map("FechaVencimiento") @db.Date
   activa             Boolean  @default(true) @map("Activa")
+  usuarioCreacion    String   @map("UsuarioCreacion") @db.VarChar(100)
 
   @@map("Promociones")
 }

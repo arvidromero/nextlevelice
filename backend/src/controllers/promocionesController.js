@@ -1,4 +1,5 @@
 const prisma = require('../config/db');
+const { mensajeAmigable } = require('../utils/errores');
 
 // GET /api/promociones?idCliente=C00001
 async function listar(req, res) {
@@ -19,12 +20,12 @@ async function crear(req, res) {
 
   try {
     const nueva = await prisma.promocion.create({
-      data: { idCliente, idProducto, cantidadCompra, cantidadBonificada, fechaVencimiento: new Date(fechaVencimiento) },
+      data: { idCliente, idProducto, cantidadCompra, cantidadBonificada, fechaVencimiento: new Date(fechaVencimiento), usuarioCreacion: req.usuario.email },
     });
     res.status(201).json(nueva);
   } catch (err) {
-    // Choca con el indice unico si ya hay una promo activa para ese cliente+producto
-    res.status(400).json({ error: 'Ya existe una promocion activa para este cliente y producto' });
+    console.error('Error al crear promocion:', err.message); // para verlo en la terminal del backend
+    res.status(400).json({ error: mensajeAmigable(err) });
   }
 }
 

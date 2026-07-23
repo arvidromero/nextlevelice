@@ -1,4 +1,5 @@
 require('dotenv').config();
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
@@ -14,12 +15,14 @@ const ventasRoutes = require('./routes/ventasRoutes');
 const promocionesRoutes = require('./routes/promocionesRoutes');
 const bitacorasRoutes = require('./routes/bitacorasRoutes');
 const ubicacionActualRoutes = require('./routes/ubicacionActualRoutes');
+const uploadsRoutes = require('./routes/uploadsRoutes');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 app.use('/api/auth', authRoutes);
 app.use('/api/productos', productosRoutes);
@@ -32,6 +35,7 @@ app.use('/api/ventas', ventasRoutes);
 app.use('/api/promociones', promocionesRoutes);
 app.use('/api/bitacoras', bitacorasRoutes);
 app.use('/api/ubicacion-actual', ubicacionActualRoutes);
+app.use('/api/uploads', uploadsRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 

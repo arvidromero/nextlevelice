@@ -13,6 +13,9 @@ export default function Topbar() {
           <NavLink to="/clientes">Clientes</NavLink>
           <NavLink to="/vehiculos">Vehiculos</NavLink>
           <NavLink to="/ubicaciones">Ubicaciones</NavLink>
+          <NavLink to="/ventas">Ventas</NavLink>
+          <NavLink to="/inventario">Inventario</NavLink>
+          <NavLink to="/movimientos">Movimientos</NavLink>
         </nav>
       </div>
       <div className="topbar-user">
