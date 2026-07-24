@@ -277,7 +277,7 @@ export default function ClienteDetalle() {
                     <td style={{ fontFamily: 'var(--font-body)' }}>{nombreProducto(p.idProducto)}</td>
                     <td>{p.cantidadCompra}</td>
                     <td>{p.cantidadBonificada}</td>
-                    <td>{new Date(p.fechaVencimiento).toLocaleDateString('es-MX')}</td>
+                    <td>{new Date(p.fechaVencimiento).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                     <td>
                       <span className="pill" style={p.activa ? { background: 'rgba(30,122,76,0.1)', color: 'var(--success)' } : { background: 'rgba(154,154,150,0.15)', color: 'var(--text-muted)' }}>
                         {p.activa ? 'Activa' : 'Inactiva'}

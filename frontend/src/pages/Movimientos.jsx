@@ -266,7 +266,7 @@ export default function Movimientos() {
               <tbody>
                 {kardex.map((k) => (
                   <tr key={k.kardexID}>
-                    <td>{new Date(k.fechaHora).toLocaleString('es-MX')}</td>
+                    <td>{new Date(k.fechaHora).toLocaleString('es-MX', { timeZone: 'UTC' })}</td>
                     <td>{nombreUbicacion(k.idUbicacion)}</td>
                     <td style={{ fontFamily: 'var(--font-body)' }}>{nombreProducto(k.idProducto)}</td>
                     <td>{k.idConcepto}</td>

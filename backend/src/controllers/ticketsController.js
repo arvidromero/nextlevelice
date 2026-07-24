@@ -45,7 +45,7 @@ async function ticketPDF(req, res) {
 
   doc.font('Helvetica-Bold').fontSize(10).text(`Folio: ${venta.idVenta}`);
   doc.font('Helvetica').fontSize(9);
-  doc.text(`Fecha: ${new Date(venta.fechaHora).toLocaleString('es-MX')}`);
+  doc.text(`Fecha: ${new Date(venta.fechaHora).toLocaleString('es-MX', { timeZone: 'UTC' })}`);
   doc.text(`Cliente: ${cliente?.nombre ?? venta.idCliente}`);
   doc.moveDown(0.3);
   doc.text('- - - - - - - - - - - - - - - - - -', centro);

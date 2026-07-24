@@ -5,11 +5,11 @@ const prisma = require('../config/db');
 const LOGO_PATH = path.join(__dirname, '../../assets/logo-reportes.png');
 
 function formatoFecha(fecha) {
-  return new Date(fecha).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric' });
+  return new Date(fecha).toLocaleDateString('es-MX', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
 }
 function formatoHora(fecha) {
   if (!fecha) return '—';
-  return new Date(fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit' });
+  return new Date(fecha).toLocaleTimeString('es-MX', { hour: '2-digit', minute: '2-digit', timeZone: 'UTC' });
 }
 function money(n) {
   return `$${Number(n).toFixed(2)}`;

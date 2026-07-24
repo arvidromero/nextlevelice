@@ -173,7 +173,7 @@ async function exportarCSV(req, res) {
   for (const d of detalles) {
     const v = mapaVenta.get(d.idVenta);
     if (!v) continue;
-    csv += `${d.idVenta},${new Date(v.fechaHora).toLocaleString('es-MX')},${v.idCliente},${v.idVehiculo},${d.idProducto},${d.cantidad},${Number(d.subtotal).toFixed(2)},${Number(v.total).toFixed(2)}\n`;
+    csv += `${d.idVenta},${new Date(v.fechaHora).toLocaleString('es-MX', { timeZone: 'UTC' })},${v.idCliente},${v.idVehiculo},${d.idProducto},${d.cantidad},${Number(d.subtotal).toFixed(2)},${Number(v.total).toFixed(2)}\n`;
   }
 
   res.setHeader('Content-Type', 'text/csv; charset=utf-8');

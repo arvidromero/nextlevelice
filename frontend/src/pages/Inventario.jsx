@@ -95,7 +95,7 @@ export default function Inventario() {
                     <tr key={`${e.idUbicacion}-${e.idProducto}`}>
                       <td style={{ fontFamily: 'var(--font-body)' }}>{nombreProducto(e.idProducto)}</td>
                       <td style={{ fontWeight: 700 }}>{e.saldo}</td>
-                      <td>{new Date(e.fechaActualizacion).toLocaleString('es-MX')}</td>
+                      <td>{new Date(e.fechaActualizacion).toLocaleString('es-MX', { timeZone: 'UTC' })}</td>
                     </tr>
                   ))}
                 </tbody>

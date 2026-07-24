@@ -22,8 +22,13 @@ export default function Mapa() {
     return vehiculos.find((v) => v.idVehiculo === id)?.descripcion ?? id;
   }
 
+  // El backend guarda la hora local pero etiquetada como UTC (bug conocido
+  // de Prisma+SQL Server), asi que hay que compensar el desfase de tu zona
+  // horaria al comparar contra la hora real de ahorita.
   function minutosDesde(fecha) {
-    return Math.round((Date.now() - new Date(fecha).getTime()) / 60000);
+    const desfaseMs = new Date().getTimezoneOffset() * 60000;
+    const horaRealGuardada = new Date(fecha).getTime() + desfaseMs;
+    return Math.round((Date.now() - horaRealGuardada) / 60000);
   }
 
   function colorPorFrescura(fecha) {

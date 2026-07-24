@@ -129,7 +129,7 @@ export default function Dashboard() {
   const datosPorVehiculo = porVehiculo.map((v) => ({ nombre: nombreVehiculo(v.idVehiculo), total: v.total }));
   const datosPorProducto = porProducto.map((p) => ({ nombre: nombreProducto(p.idProducto), total: p.total }));
   const datosTendencia = tendencia.map((t) => ({
-    fecha: new Date(t.fecha).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit' }),
+    fecha: new Date(t.fecha).toLocaleDateString('es-MX', { day: '2-digit', month: '2-digit', timeZone: 'UTC' }),
     total: t.total,
   }));
 

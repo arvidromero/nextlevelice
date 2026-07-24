@@ -98,7 +98,7 @@ export default function Bitacoras() {
               <tbody>
                 {bitacoras.map((b) => (
                   <tr key={b.idBitacora}>
-                    <td>{new Date(b.fecha).toLocaleDateString('es-MX')}</td>
+                    <td>{new Date(b.fecha).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                     <td style={{ fontFamily: 'var(--font-body)' }}>{nombreVehiculo(b.idVehiculo)}</td>
                     <td style={{ fontFamily: 'var(--font-body)' }}>{b.idChofer}</td>
                     <td>{b.odometroInicial ?? '—'} km</td>
