@@ -3,6 +3,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const ctrl = require('../controllers/bitacorasController');
 const extraCtrl = require('../controllers/operacionExtraController');
 const reportesCtrl = require('../controllers/reportesController');
+const visitasCtrl = require('../controllers/visitasController');
 
 const router = express.Router();
 
@@ -19,5 +20,8 @@ router.post('/:idBitacora/abastecimientos', requireAuth, extraCtrl.crearAbasteci
 
 router.get('/:idBitacora/movimientos-extra', requireAuth, extraCtrl.listarMovimientosExtra);
 router.post('/:idBitacora/movimientos-extra', requireAuth, extraCtrl.crearMovimientoExtra);
+
+router.get('/:idBitacora/visitas', requireAuth, visitasCtrl.listarPorBitacora);
+router.post('/:idBitacora/visitas', requireAuth, visitasCtrl.crear);
 
 module.exports = router;

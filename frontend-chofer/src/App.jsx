@@ -11,6 +11,7 @@ import Vender from './pages/Vender';
 import Traspaso from './pages/Traspaso';
 import Gastos from './pages/Gastos';
 import Cierre from './pages/Cierre';
+import Visita from './pages/Visita';
 
 function Shell({ children }) {
   const { usuario } = useAuth();
@@ -54,6 +55,7 @@ export default function App() {
             <Route path="/traspaso" element={<RutaProtegida requiereOperacion><Traspaso /></RutaProtegida>} />
             <Route path="/gastos" element={<RutaProtegida requiereOperacion><Gastos /></RutaProtegida>} />
             <Route path="/cierre" element={<RutaProtegida requiereOperacion><Cierre /></RutaProtegida>} />
+            <Route path="/visita" element={<RutaProtegida requiereOperacion><Visita /></RutaProtegida>} />
           </Routes>
         </BrowserRouter>
       </BitacoraProvider>

@@ -107,9 +107,9 @@ export default function Mapa() {
   const sinReportar = Math.max(vehiculos.length - datos.length, 0);
 
   return (
-    <div className="app-shell-web">
+    <div className="mapa-shell">
       <Topbar />
-      <div style={{ display: 'flex', height: 'calc(100vh - 61px)' }}>
+      <div className="mapa-contenido" style={{ display: 'flex', height: '100vh' }}>
         {/* Panel lateral */}
         <div style={{ width: 320, flexShrink: 0, borderRight: '1px solid var(--border)', overflowY: 'auto', padding: '20px 18px', background: 'var(--surface)' }}>
           <h1 style={{ fontSize: 18, marginBottom: 2 }}>Mapa en vivo</h1>

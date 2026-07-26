@@ -60,7 +60,7 @@ async function crear(req, res) {
 
   try {
     const resultado = await prisma.$transaction(async (tx) => {
-      const folioRows = await tx.$queryRaw`EXEC sp_GenerarFolioVenta @Fecha = ${new Date()}`;
+      const folioRows = await tx.$queryRaw`EXEC sp_GenerarFolioVenta @Fecha = ${new Date()}, @idVehiculo = ${idVehiculo}`;
       const idVenta = folioRows[0].Folio;
 
       const productos = await tx.producto.findMany({

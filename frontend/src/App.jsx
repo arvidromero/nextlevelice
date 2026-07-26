@@ -12,6 +12,7 @@ import ClienteDetalle from './pages/ClienteDetalle';
 import Movimientos from './pages/Movimientos';
 import Bitacoras from './pages/Bitacoras';
 import Usuarios from './pages/Usuarios';
+import Visitas from './pages/Visitas';
 import Dashboard from './pages/Dashboard';
 import Mapa from './pages/Mapa';
 
@@ -33,6 +34,7 @@ export default function App() {
           <Route path="/movimientos" element={<ProtectedRoute><Movimientos /></ProtectedRoute>} />
           <Route path="/bitacoras" element={<ProtectedRoute><Bitacoras /></ProtectedRoute>} />
           <Route path="/usuarios" element={<ProtectedRoute><Usuarios /></ProtectedRoute>} />
+          <Route path="/visitas" element={<ProtectedRoute><Visitas /></ProtectedRoute>} />
         </Routes>
       </BrowserRouter>
     </AuthProvider>

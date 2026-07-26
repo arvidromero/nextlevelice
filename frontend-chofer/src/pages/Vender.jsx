@@ -196,8 +196,11 @@ export default function Vender() {
       {tipoPago === 'Transferencia' && (
         <div className="field">
           <label>Foto de la transferencia</label>
-          {evidencia && <p style={{ fontSize: 13, color: 'var(--success)', marginBottom: 6 }}>✓ Foto cargada</p>}
-          <input type="file" accept="image/*" capture="environment" onChange={onSeleccionarEvidencia} />
+          {evidencia && <p style={{ fontSize: 13, color: 'var(--success)', marginBottom: 8 }}>✓ Foto capturada</p>}
+          <label className="btn btn-ghost" style={{ display: 'block', textAlign: 'center', cursor: 'pointer' }}>
+            📷 {evidencia ? 'Tomar otra foto' : 'Tomar foto'}
+            <input type="file" accept="image/*" capture="environment" onChange={onSeleccionarEvidencia} style={{ display: 'none' }} />
+          </label>
           {subiendoEvidencia && <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 4 }}>Subiendo...</p>}
         </div>
       )}

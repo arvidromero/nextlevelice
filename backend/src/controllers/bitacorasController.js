@@ -25,18 +25,33 @@ async function obtenerActiva(req, res) {
 }
 
 // POST /api/bitacoras  -- el chofer llena su checklist matutino
-// body: { idVehiculo, odometroInicial, odometroImagen?, varillaAntes?, liquidoFrenos?, liquidoDireccion? }
+// body: { idVehiculo, odometroInicial, odometroImagen?, varillaAntes?, varillaAntesImagen,
+//         liquidoFrenos?, liquidoFrenosImagen, liquidoDireccion?, liquidoDireccionImagen, ayudante? }
 async function crear(req, res) {
-  const { idVehiculo, odometroInicial, odometroImagen, varillaAntes, liquidoFrenos, liquidoDireccion } = req.body;
+  const {
+    idVehiculo, odometroInicial, odometroImagen,
+    varillaAntes, varillaAntesImagen,
+    liquidoFrenos, liquidoFrenosImagen,
+    liquidoDireccion, liquidoDireccionImagen,
+    ayudante,
+  } = req.body;
+
   if (!idVehiculo || odometroInicial == null) {
     return res.status(400).json({ error: 'idVehiculo y odometroInicial son requeridos' });
+  }
+  if (!varillaAntesImagen || !liquidoFrenosImagen || !liquidoDireccionImagen) {
+    return res.status(400).json({ error: 'Las 3 fotos del checklist (varilla, frenos, direccion) son obligatorias' });
   }
 
   const nueva = await prisma.bitacora.create({
     data: {
       idVehiculo,
       idChofer: req.usuario.email,
-      odometroInicial, odometroImagen, varillaAntes, liquidoFrenos, liquidoDireccion,
+      ayudante: ayudante || undefined,
+      odometroInicial, odometroImagen,
+      varillaAntes, varillaAntesImagen,
+      liquidoFrenos, liquidoFrenosImagen,
+      liquidoDireccion, liquidoDireccionImagen,
       fhSalida: new Date(),
       estado: 'PendienteVoBo',
     },

@@ -6,6 +6,7 @@ export default function BottomNav() {
       <NavLink to="/" end><span className="icono">🏠</span>Inicio</NavLink>
       <NavLink to="/vender"><span className="icono">🧊</span>Vender</NavLink>
       <NavLink to="/traspaso"><span className="icono">🔁</span>Traspaso</NavLink>
+      <NavLink to="/visita"><span className="icono">📋</span>Visita</NavLink>
       <NavLink to="/gastos"><span className="icono">💵</span>Gastos</NavLink>
       <NavLink to="/cierre"><span className="icono">🌙</span>Cierre</NavLink>
     </div>

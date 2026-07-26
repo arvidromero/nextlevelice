@@ -22,7 +22,7 @@ async function ticketPDF(req, res) {
 
   // Papel termico de 80mm (72mm imprimibles). 1mm = 2.8346pt
   const anchoPt = 80 * 2.8346;
-  const altoEstimado = 280 + detalle.length * 16;
+  const altoEstimado = 340 + detalle.length * 22;
   const margen = 12;
 
   res.setHeader('Content-Type', 'application/pdf');
@@ -33,41 +33,42 @@ async function ticketPDF(req, res) {
 
   const centro = { align: 'center', width: anchoPt - margen * 2 };
 
-  const anchoLogo = 110;
+  const anchoLogo = 130;
   const altoLogo = anchoLogo * (551 / 600);
   const yLogo = doc.y;
   doc.image(LOGO_PATH, (anchoPt - anchoLogo) / 2, yLogo, { width: anchoLogo });
-  doc.y = yLogo + altoLogo + 6;
-  doc.font('Helvetica').fontSize(8).text('fashion | gourmet ICE', centro);
-  doc.moveDown(0.5);
-  doc.fontSize(9).text('- - - - - - - - - - - - - - - - - -', centro);
-  doc.moveDown(0.3);
+  doc.y = yLogo + altoLogo + 8;
+  doc.font('Helvetica').fontSize(11).text('fashion | gourmet ICE', centro);
+  doc.moveDown(0.6);
+  doc.fontSize(11).text('- - - - - - - - - - - - - - - - -', centro);
+  doc.moveDown(0.4);
 
-  doc.font('Helvetica-Bold').fontSize(10).text(`Folio: ${venta.idVenta}`);
-  doc.font('Helvetica').fontSize(9);
+  doc.font('Helvetica-Bold').fontSize(14).text(`Folio: ${venta.idVenta}`);
+  doc.font('Helvetica').fontSize(12);
   doc.text(`Fecha: ${new Date(venta.fechaHora).toLocaleString('es-MX', { timeZone: 'UTC' })}`);
   doc.text(`Cliente: ${cliente?.nombre ?? venta.idCliente}`);
-  doc.moveDown(0.3);
-  doc.text('- - - - - - - - - - - - - - - - - -', centro);
+  doc.moveDown(0.4);
+  doc.fontSize(11).text('- - - - - - - - - - - - - - - - -', centro);
 
-  doc.moveDown(0.2);
+  doc.moveDown(0.3);
   for (const d of detalle) {
     const esGratis = d.cantidadBonificada > 0;
     const importeTxt = esGratis ? 'GRATIS' : `$${Number(d.subtotal).toFixed(2)}`;
-    doc.font('Helvetica').fontSize(9).text(`${d.cantidad}x ${nombreDe(d.idProducto)}`, { continued: false });
-    doc.font(esGratis ? 'Helvetica-Bold' : 'Helvetica').fontSize(9).text(`   ${importeTxt}`, { align: 'right' });
+    doc.font('Helvetica-Bold').fontSize(13).text(`${d.cantidad}x ${nombreDe(d.idProducto)}`, { continued: false });
+    doc.font(esGratis ? 'Helvetica-Bold' : 'Helvetica').fontSize(13).text(`   ${importeTxt}`, { align: 'right' });
+    doc.moveDown(0.1);
   }
 
   doc.moveDown(0.3);
-  doc.fontSize(9).text('- - - - - - - - - - - - - - - - - -', centro);
-  doc.moveDown(0.2);
-  doc.font('Helvetica-Bold').fontSize(13).text(`TOTAL: $${Number(venta.total).toFixed(2)}`, { align: 'right' });
-  doc.font('Helvetica').fontSize(9);
+  doc.fontSize(11).text('- - - - - - - - - - - - - - - - -', centro);
+  doc.moveDown(0.3);
+  doc.font('Helvetica-Bold').fontSize(18).text(`TOTAL: $${Number(venta.total).toFixed(2)}`, { align: 'right' });
+  doc.font('Helvetica').fontSize(12);
   if (pagos[0]) doc.text(`Pago: ${pagos[0].tipoPago}`, { align: 'right' });
 
-  doc.moveDown(0.8);
-  doc.fontSize(8).text('¡Gracias por su compra!', centro);
-  doc.fontSize(7).fillColor('#888').text('www.nextlevelice.com', centro);
+  doc.moveDown(1);
+  doc.font('Helvetica-Bold').fontSize(11).text('¡Gracias por su compra!', centro);
+  doc.font('Helvetica').fontSize(9).fillColor('#666').text('www.nextlevelice.com', centro);
 
   doc.end();
 }

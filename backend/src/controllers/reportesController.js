@@ -24,16 +24,21 @@ async function reportePDF(req, res) {
   const finDia = new Date(inicioDia);
   finDia.setDate(finDia.getDate() + 1);
 
-  const [ventas, abastecimientos, movimientosExtra, corteRows] = await Promise.all([
+  const [ventas, abastecimientos, movimientosExtra, visitas, corteRows] = await Promise.all([
     prisma.venta.findMany({
       where: { idVehiculo: bitacora.idVehiculo, fechaHora: { gte: inicioDia, lt: finDia } },
       orderBy: { fechaHora: 'asc' },
     }),
     prisma.abastecimiento.findMany({ where: { idBitacora: bitacora.idBitacora } }),
     prisma.movimientoExtra.findMany({ where: { idBitacora: bitacora.idBitacora } }),
+    prisma.visita.findMany({ where: { idBitacora: bitacora.idBitacora }, orderBy: { fechaHora: 'asc' } }),
     prisma.$queryRaw`SELECT * FROM vw_CorteCaja WHERE idBitacora = ${bitacora.idBitacora}`,
   ]);
   const corte = corteRows[0];
+  const clientesVisitados = await prisma.cliente.findMany({
+    where: { idCliente: { in: visitas.map((v) => v.idCliente) } },
+  });
+  const nombreClienteDe = (id) => clientesVisitados.find((c) => c.idCliente === id)?.nombre ?? id;
 
   res.setHeader('Content-Type', 'application/pdf');
   res.setHeader('Content-Disposition', `attachment; filename="reporte-${bitacora.idVehiculo}-${bitacora.fecha.toISOString().slice(0, 10)}.pdf"`);
@@ -80,6 +85,18 @@ async function reportePDF(req, res) {
     doc.fillColor('#000');
     const totalVentas = ventas.filter((v) => v.estado === 'Confirmada').reduce((a, v) => a + Number(v.total), 0);
     doc.font('Helvetica-Bold').text(`Subtotal ventas confirmadas: ${money(totalVentas)}`);
+  }
+  doc.moveDown(1);
+
+  // ---- Visitas sin venta ----
+  doc.fontSize(13).font('Helvetica-Bold').text(`Visitas sin venta (${visitas.length})`);
+  doc.fontSize(10).font('Helvetica').moveDown(0.4);
+  if (visitas.length === 0) {
+    doc.fillColor('#888').text('Sin visitas registradas.').fillColor('#000');
+  } else {
+    for (const v of visitas) {
+      doc.text(`${formatoHora(v.fechaHora)}   Cliente: ${nombreClienteDe(v.idCliente)}${v.notas ? '   Nota: ' + v.notas : ''}`);
+    }
   }
   doc.moveDown(1);
 

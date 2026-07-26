@@ -193,13 +193,17 @@ model Bitacora {
   idBitacora       String    @id @default(uuid()) @map("idBitacora") @db.VarChar(36)
   idVehiculo       String    @map("idVehiculo") @db.VarChar(10)
   idChofer         String    @map("idChofer") @db.VarChar(100)
+  ayudante         String?   @map("Ayudante") @db.VarChar(100)
   fecha            DateTime  @default(now()) @map("Fecha") @db.Date
   estado           String    @default("PendienteVoBo") @map("Estado") @db.VarChar(15)
   odometroInicial  Int?      @map("Odometro_Inicial")
   odometroImagen   String?   @map("Odometro_Imagen")
   varillaAntes     String?   @map("Varilla_Antes") @db.VarChar(10)
+  varillaAntesImagen     String? @map("VarillaAntes_Imagen")
   liquidoFrenos    String?   @map("Liquido_Frenos") @db.VarChar(10)
+  liquidoFrenosImagen    String? @map("LiquidoFrenos_Imagen")
   liquidoDireccion String?   @map("Liquido_Direccion") @db.VarChar(10)
+  liquidoDireccionImagen String? @map("LiquidoDireccion_Imagen")
   fhSalida         DateTime? @map("FH_Salida")
   usuarioAprobo    String?   @map("UsuarioAprobo")
   fhAprobacion     DateTime? @map("FH_Aprobacion")
@@ -235,6 +239,18 @@ model MovimientoExtra {
   usuario           String   @map("Usuario") @db.VarChar(100)
 
   @@map("MovimientosExtra")
+}
+
+model Visita {
+  idVisita   String   @id @default(uuid()) @map("idVisita") @db.VarChar(36)
+  idBitacora String   @map("idBitacora") @db.VarChar(36)
+  idCliente  String   @map("idCliente") @db.VarChar(10)
+  notas      String?  @map("Notas") @db.NVarChar(500)
+  imagen     String?  @map("Imagen")
+  fechaHora  DateTime @default(now()) @map("FechaHora")
+  usuario    String   @map("Usuario") @db.VarChar(100)
+
+  @@map("Visitas")
 }
 
 model UbicacionActual {

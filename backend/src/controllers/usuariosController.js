@@ -57,4 +57,14 @@ async function desactivar(req, res) {
   res.status(204).send();
 }
 
-module.exports = { listar, crear, actualizar, desactivar };
+// GET /api/usuarios/choferes -- version ligera, para que un chofer pueda
+// elegir a otro como "ayudante" (no requiere ser Admin)
+async function listarChoferes(req, res) {
+  const choferes = await prisma.usuario.findMany({
+    where: { rol: 'Operador', activo: true },
+    select: { email: true, nombre: true },
+  });
+  res.json(choferes);
+}
+
+module.exports = { listar, crear, actualizar, desactivar, listarChoferes };

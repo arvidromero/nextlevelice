@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import api from '../api/client';
+import api, { urlImagen } from '../api/client';
 import Topbar from '../components/Topbar';
 
 export default function Bitacoras() {
@@ -89,8 +89,10 @@ export default function Bitacoras() {
                   <th>Fecha</th>
                   <th>Vehiculo</th>
                   <th>Chofer</th>
+                  <th>Ayudante</th>
                   <th>Odometro inicial</th>
                   <th>Liquidos</th>
+                  <th>Fotos</th>
                   <th>Estado</th>
                   <th></th>
                 </tr>
@@ -101,9 +103,21 @@ export default function Bitacoras() {
                     <td>{new Date(b.fecha).toLocaleDateString('es-MX', { timeZone: 'UTC' })}</td>
                     <td style={{ fontFamily: 'var(--font-body)' }}>{nombreVehiculo(b.idVehiculo)}</td>
                     <td style={{ fontFamily: 'var(--font-body)' }}>{b.idChofer}</td>
+                    <td style={{ fontSize: 12 }}>{b.ayudante || '—'}</td>
                     <td>{b.odometroInicial ?? '—'} km</td>
                     <td style={{ fontSize: 12 }}>
                       Aceite: {b.varillaAntes ?? '—'} · Frenos: {b.liquidoFrenos ?? '—'} · Dir: {b.liquidoDireccion ?? '—'}
+                    </td>
+                    <td style={{ display: 'flex', gap: 4 }}>
+                      {[b.varillaAntesImagen, b.liquidoFrenosImagen, b.liquidoDireccionImagen].map((img, i) => (
+                        img ? (
+                          <a key={i} href={urlImagen(img)} target="_blank" rel="noreferrer">
+                            <img src={urlImagen(img)} alt="" style={{ width: 30, height: 30, objectFit: 'cover', borderRadius: 4, border: '1px solid var(--border)' }} />
+                          </a>
+                        ) : (
+                          <div key={i} style={{ width: 30, height: 30, borderRadius: 4, background: '#F2F2F0' }} />
+                        )
+                      ))}
                     </td>
                     <td><span className="pill" style={colorEstado(b.estado)}>{b.estado}</span></td>
                     <td style={{ display: 'flex', gap: 8 }}>

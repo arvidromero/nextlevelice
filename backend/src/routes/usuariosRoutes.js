@@ -4,6 +4,7 @@ const ctrl = require('../controllers/usuariosController');
 
 const router = express.Router();
 
+router.get('/choferes', requireAuth, ctrl.listarChoferes);
 router.get('/', requireAuth, requireRole('Admin'), ctrl.listar);
 router.post('/', requireAuth, requireRole('Admin'), ctrl.crear);
 router.put('/:email', requireAuth, requireRole('Admin'), ctrl.actualizar);

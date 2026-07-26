@@ -18,6 +18,7 @@ const ubicacionActualRoutes = require('./routes/ubicacionActualRoutes');
 const uploadsRoutes = require('./routes/uploadsRoutes');
 const usuariosRoutes = require('./routes/usuariosRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
+const visitasRoutes = require('./routes/visitasRoutes');
 
 const app = express();
 
@@ -40,6 +41,7 @@ app.use('/api/ubicacion-actual', ubicacionActualRoutes);
 app.use('/api/uploads', uploadsRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/dashboard', dashboardRoutes);
+app.use('/api/visitas', visitasRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
