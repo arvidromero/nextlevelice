@@ -140,6 +140,7 @@ model Promocion {
   fechaInicio        DateTime @default(now()) @map("FechaInicio") @db.Date
   fechaVencimiento   DateTime @map("FechaVencimiento") @db.Date
   activa             Boolean  @default(true) @map("Activa")
+  usuarioCreacion    String   @map("UsuarioCreacion") @db.VarChar(100)
 
   @@map("Promociones")
 }
@@ -188,6 +189,89 @@ model Pago {
   @@map("Pagos")
 }
 
-// Nota: el resto de las tablas (Bitacoras, Abastecimientos,
-// MovimientosExtra, Ubicacion_Actual) se agregan con el mismo patron
-// conforme vayamos construyendo cada modulo.
+model Bitacora {
+  idBitacora       String    @id @default(uuid()) @map("idBitacora") @db.VarChar(36)
+  idVehiculo       String    @map("idVehiculo") @db.VarChar(10)
+  idChofer         String    @map("idChofer") @db.VarChar(100)
+  ayudante         String?   @map("Ayudante") @db.VarChar(100)
+  fecha            DateTime  @default(now()) @map("Fecha") @db.Date
+  estado           String    @default("PendienteVoBo") @map("Estado") @db.VarChar(15)
+  odometroInicial  Int?      @map("Odometro_Inicial")
+  odometroImagen   String?   @map("Odometro_Imagen")
+  varillaAntes     String?   @map("Varilla_Antes") @db.VarChar(10)
+  varillaAntesImagen     String? @map("VarillaAntes_Imagen")
+  liquidoFrenos    String?   @map("Liquido_Frenos") @db.VarChar(10)
+  liquidoFrenosImagen    String? @map("LiquidoFrenos_Imagen")
+  liquidoDireccion String?   @map("Liquido_Direccion") @db.VarChar(10)
+  liquidoDireccionImagen String? @map("LiquidoDireccion_Imagen")
+  fhSalida         DateTime? @map("FH_Salida")
+  usuarioAprobo    String?   @map("UsuarioAprobo")
+  fhAprobacion     DateTime? @map("FH_Aprobacion")
+  odometroFinal    Int?      @map("Odometro_Final")
+  varillaDespues   String?   @map("Varilla_Despues") @db.VarChar(10)
+  fhLlegada        DateTime? @map("FH_Llegada")
+
+  @@map("Bitacoras")
+}
+
+model Abastecimiento {
+  idAbastecimiento String   @id @default(uuid()) @map("idAbastecimiento") @db.VarChar(36)
+  idBitacora       String   @map("idBitacora") @db.VarChar(36)
+  idVehiculo       String   @map("idVehiculo") @db.VarChar(10)
+  fechaHora        DateTime @default(now()) @map("FechaHora")
+  ubicacion        String?  @map("Ubicacion")
+  litros           Decimal? @map("Litros") @db.Decimal(6, 2)
+  importe          Decimal  @map("Importe") @db.Decimal(10, 2)
+  evidencia        String?  @map("Evidencia")
+  usuario          String   @map("Usuario") @db.VarChar(100)
+
+  @@map("Abastecimientos")
+}
+
+model MovimientoExtra {
+  idMovimientoExtra String   @id @default(uuid()) @map("idMovimientoExtra") @db.VarChar(36)
+  idBitacora        String   @map("idBitacora") @db.VarChar(36)
+  tipo              String   @map("Tipo") @db.VarChar(10)
+  concepto          String   @map("Concepto")
+  importe           Decimal  @map("Importe") @db.Decimal(10, 2)
+  evidencia         String?  @map("Evidencia")
+  fechaHora         DateTime @default(now()) @map("FechaHora")
+  usuario           String   @map("Usuario") @db.VarChar(100)
+
+  @@map("MovimientosExtra")
+}
+
+model Visita {
+  idVisita   String   @id @default(uuid()) @map("idVisita") @db.VarChar(36)
+  idBitacora String   @map("idBitacora") @db.VarChar(36)
+  idCliente  String   @map("idCliente") @db.VarChar(10)
+  notas      String?  @map("Notas") @db.NVarChar(500)
+  imagen     String?  @map("Imagen")
+  fechaHora  DateTime @default(now()) @map("FechaHora")
+  usuario    String   @map("Usuario") @db.VarChar(100)
+
+  @@map("Visitas")
+}
+
+model Abono {
+  idAbono         Int      @id @default(autoincrement()) @map("idAbono")
+  idCliente       String   @map("idCliente") @db.VarChar(10)
+  emailUsuario    String   @map("EmailUsuario") @db.VarChar(100)
+  fecha           DateTime @default(now()) @map("Fecha")
+  monto           Decimal  @map("Monto") @db.Decimal(10, 2)
+  metodoPago      String   @map("MetodoPago") @db.VarChar(20)
+  fotoComprobante String?  @map("FotoComprobante")
+  notas           String?  @map("Notas") @db.VarChar(255)
+
+  @@map("Abonos")
+}
+
+model UbicacionActual {
+  idVehiculo String   @id @map("idVehiculo") @db.VarChar(10)
+  idChofer   String?  @map("idChofer") @db.VarChar(100)
+  latitud    Decimal  @map("Latitud") @db.Decimal(10, 6)
+  longitud   Decimal  @map("Longitud") @db.Decimal(10, 6)
+  fechaHora  DateTime @default(now()) @map("FechaHora")
+
+  @@map("Ubicacion_Actual")
+}

@@ -19,6 +19,7 @@ const uploadsRoutes = require('./routes/uploadsRoutes');
 const usuariosRoutes = require('./routes/usuariosRoutes');
 const dashboardRoutes = require('./routes/dashboardRoutes');
 const visitasRoutes = require('./routes/visitasRoutes');
+const cuentasPorCobrarRoutes = require('./routes/cuentasPorCobrarRoutes');
 
 const app = express();
 
@@ -42,6 +43,7 @@ app.use('/api/uploads', uploadsRoutes);
 app.use('/api/usuarios', usuariosRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/visitas', visitasRoutes);
+app.use('/api/cuentas-por-cobrar', cuentasPorCobrarRoutes);
 
 app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
 
